@@ -1,5 +1,6 @@
 add_executable(pipes_test
     main.cpp
+    accumulate.cpp
     adjacent.cpp
     cartesian_product.cpp
     combinations.cpp

@@ -1,9 +1,11 @@
 #ifndef PIPES_HPP
 #define PIPES_HPP
 
+#include "pipes/accumulate.hpp"
 #include "pipes/adjacent.hpp"
 #include "pipes/cartesian_product.hpp"
 #include "pipes/combinations.hpp"
+#include "pipes/count.hpp"
 #include "pipes/dev_null.hpp"
 #include "pipes/do_then.hpp"
 #include "pipes/drop.hpp"
@@ -27,6 +29,7 @@
 #include "pipes/take_while.hpp"
 #include "pipes/tee.hpp"
 #include "pipes/to_out_stream.hpp"
+#include "pipes/to_vector.hpp"
 #include "pipes/transform.hpp"
 #include "pipes/unzip.hpp"
 

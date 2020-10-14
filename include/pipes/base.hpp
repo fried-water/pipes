@@ -27,6 +27,9 @@ namespace pipes
         Pipeline& pipeline_;
     };
 
+    // Dummy type to return from 'void' terminal pipelines to not need multiple overloads
+    struct void_t {};
+
     template<typename Derived>
     struct pipeline_base : detail::crtp<Derived, pipeline_base>
     {
@@ -39,6 +42,8 @@ namespace pipes
         Derived& operator++() { return this->derived(); }
         Derived& operator++(int){ ++this->derived(); return this->derived(); }
         pipeline_proxy<Derived> operator*() { return pipeline_proxy<Derived>(this->derived()); }
+
+        auto sink() { return void_t{}; }
     };
 } // namespace pipes
 

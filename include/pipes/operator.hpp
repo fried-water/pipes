@@ -12,21 +12,35 @@ namespace pipes
 // range >>= pipeline (rvalue ranges)
     
     template<typename Range, typename Pipeline, detail::IsARange<Range> = true, detail::IsAPipeline<Pipeline> = true>
-    std::enable_if_t<!std::is_lvalue_reference<Range>::value> operator>>=(Range&& range, Pipeline&& pipeline)
+    auto operator>>=(Range&& range, Pipeline&& pipeline) -> std::enable_if_t<!std::is_reference<Range>::value, decltype(FWD(pipeline).sink())>
     {
         using std::begin;
         using std::end;
-        std::copy(std::make_move_iterator(begin(range)), std::make_move_iterator(end(range)), pipeline);
+
+        auto it = std::make_move_iterator(begin(range));
+        auto end_ = std::make_move_iterator(end(range));
+        for(; it != end_; ++it) {
+            *pipeline++ = *it;
+        }
+
+        return FWD(pipeline).sink();
     }
 
 // range >>= pipeline (lvalue ranges)
     
     template<typename Range, typename Pipeline, detail::IsARange<Range> = true, detail::IsAPipeline<Pipeline> = true>
-    std::enable_if_t<std::is_lvalue_reference<Range>::value> operator>>=(Range&& range, Pipeline&& pipeline)
+    auto operator>>=(Range&& range, Pipeline&& pipeline) -> std::enable_if_t<std::is_reference<Range>::value, decltype(FWD(pipeline).sink())>
     {
         using std::begin;
         using std::end;
-        std::copy(begin(range), end(range), pipeline);
+
+        auto it = begin(range);
+        auto end_ = end(range);
+        for(; it != end_; ++it) {
+            *pipeline++ = *it;
+        }
+
+        return FWD(pipeline).sink();
     }
 
 // pipe >>= pipe
@@ -42,7 +56,7 @@ namespace pipes
     template<typename Pipe, typename Pipeline, detail::IsAPipe<Pipe> = true, detail::IsAPipeline<Pipeline> = true>
     auto operator>>=(Pipe&& pipe, Pipeline&& pipeline)
     {
-        return make_generic_pipeline(pipe, pipeline);
+        return make_generic_pipeline(FWD(pipe), FWD(pipeline));
     }
     
 } // namespace pipes

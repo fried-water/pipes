@@ -18,8 +18,14 @@ namespace pipes
                 headPipe_.template onReceive<Ts...>(FWD(inputs)..., tailPipeline_);
             }
             
-            generic_pipeline(HeadPipe headPipe, TailPipeline tailPipeline) : headPipe_(headPipe), tailPipeline_(tailPipeline) {}
+            template<typename HeadPipe_, typename TailPipeline_>
+            generic_pipeline(HeadPipe_&& headPipe, TailPipeline_&& tailPipeline) : headPipe_(FWD(headPipe)), tailPipeline_(FWD(tailPipeline)) {}
             
+            template<typename TailPipeline_ = TailPipeline, 
+                typename = std::enable_if_t<std::is_copy_constructible<decltype(std::declval<TailPipeline_&>().sink())>::value>>
+            auto sink() & { return tailPipeline_.sink(); }
+            auto sink() && { return std::move(tailPipeline_).sink(); }
+
         private:
             HeadPipe headPipe_;
             TailPipeline tailPipeline_;
@@ -44,7 +50,7 @@ namespace pipes
         template<typename Pipe1, typename Pipe2, typename TailPipeline>
         auto make_generic_pipeline(detail::CompositePipe<Pipe1, Pipe2> compositePipe, TailPipeline&& tailPipeline)
         {
-            return make_generic_pipeline(compositePipe.pipe1, make_generic_pipeline(compositePipe.pipe2, tailPipeline));
+            return make_generic_pipeline(compositePipe.pipe1, make_generic_pipeline(compositePipe.pipe2, FWD(tailPipeline)));
         }
         
     } // namespace detail
